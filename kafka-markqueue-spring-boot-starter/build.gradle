@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.1.2.RELEASE'
+}
+
+
+group 'com.dobest'
+version '0.0.1'
+
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    compile project(':kafka-markqueue-core')
+    compileOnly('org.springframework.boot:spring-boot-configuration-processor:2.1.2.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter-actuator:2.1.2.RELEASE')
+    implementation('org.springframework.boot:spring-boot-starter:2.1.2.RELEASE')
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+bootRun {
+    jvmArgs = ["-Dfile.encoding=UTF-8",
+               "-Dmanagement.endpoints.web.exposure.include=*",
+               "-Dmanagement.endpoint.health.show-details=always",
+               "-Dspring.application.name=${project.name}",
+               "-Dspring.application.version=${project.version}"
+    ]
+}
+
+
+jar {
+    enabled = true
+}
+
