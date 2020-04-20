@@ -1,0 +1,5 @@
+rootProject.name = 'kafka-markqueue-starter'
+
+include 'kafka-markqueue-core'
+include 'kafka-markqueue-spring-boot-starter'
+include 'kafka-markqueue-sample'
