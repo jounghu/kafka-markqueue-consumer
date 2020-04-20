@@ -1,0 +1,14 @@
+# config kafka
+markqueue:
+  kafka:
+    topic: mark-queue-test
+    #  broker_list: ${KAFKA_SERVER:localhost:9092}
+    broker_list: ${KAFKA_SERVER:localhost:8092,localhost:8093,localhost:8094}
+    group_id: datalake
+    auto_offset_reset: none
+    async_process: true
+    async_process_thread_num: ${KAFKA_HANDLER_THREAD_NUM:10}
+    fetcherThreadNum: ${KAFKA_FETCHER_THREAD_NUM:6}
+    max_poll_record: ${KAFKA_MAX_POLL_RECORD:100}
+    max_retry_nums: ${KAFKA_MAX_RETRY_NUMS:1}
+    deserializerClazz: com.dobest.kafka.processor.User
