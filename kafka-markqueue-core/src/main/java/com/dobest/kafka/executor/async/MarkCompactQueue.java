@@ -76,12 +76,8 @@ public class MarkCompactQueue {
         // 只有当前一个offset小于当前offset那么才放进去
         ConsumerRecord record = recordContext.getConsumerRecord();
         long curOffset = record.offset();
-        if (invalidOffset(curOffset)) {
-            throw new QueueOffsetInvalidException("非法Offset! rearOffset=" + getLastOffset() + ", frontOffset=" + getFrontOffset() + ", curOffset=" + curOffset
-                    , new TopicPartition(record.topic(), record.partition()));
-        }
 
-        if (getLastOffset() < curOffset || isEmpty()) {
+        if (curOffset == getLastOffset() + 1 || isEmpty()) {
             while (isFull()) {
                 // 如果已满，尝试压缩
                 if (!compact()) {
@@ -94,13 +90,16 @@ public class MarkCompactQueue {
                     }
                 }
             }
-            elem[rear] = recordContext;
-            if (++rear == maxSize)
-                rear = 0;
+            elem[rear++] = recordContext;
+            rear %= maxSize;
             return true;
+        } else if (curOffset >= getFrontOffset() && curOffset <= getLastOffset()) {
+            log.warn("Record has been processed! curOffset {}, frontOffset {}, rearOffset {}", curOffset, getFrontOffset(), getLastOffset());
+            return false;
         }
-        log.warn("当前消息已经被处理过,tail offset: {}, current offset: {}", getLastOffset(), curOffset);
-        return false;
+        throw new QueueOffsetInvalidException("非法Offset! rearOffset=" + getLastOffset() + ", frontOffset=" + getFrontOffset() + ", curOffset=" + curOffset
+                , new TopicPartition(record.topic(), record.partition()), getLastOffset() + 1);
+
     }
 
     private boolean invalidOffset(long curOffset) {

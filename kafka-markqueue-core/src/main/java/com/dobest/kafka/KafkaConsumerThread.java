@@ -5,10 +5,7 @@ import com.dobest.kafka.listener.SeekRebalanceListener;
 import com.dobest.kafka.properties.KafkaProperties;
 import com.dobest.kafka.serialization.JsonDeserializer;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -101,15 +98,18 @@ public class KafkaConsumerThread<T> extends Thread {
                 // 检查并提交偏移量
                 executor.commitOffset(kafkaConsumer);
             } catch (QueueOffsetInvalidException e) {
-                log.error("markQueue offset error! TopicPartitons" + e.partitions(), e);
-                doSeekOffset(kafkaConsumer, e.partitions());
+                log.error("markQueue offset error! will seek to topic-partition-offset:" + e.partitions() + "-" + e.getOffset(), e);
+                try {
+                    kafkaConsumer.seek(e.getTp(), e.getOffset());
+                } catch (OffsetOutOfRangeException oe) {
+                    log.error("markQueue offset out range error! will seek to largest offset!", oe);
+                    new SeekRebalanceListener(kafkaConsumer).onPartitionsAssigned(Collections.singleton(e.getTp()));
+                }
             } catch (Exception e) {
                 log.error("kafka take failed", e);
             }
         }
     }
 
-    private void doSeekOffset(KafkaConsumer<String, T> kafkaConsumer, Set<TopicPartition> e) {
-        new SeekRebalanceListener(kafkaConsumer).onPartitionsAssigned(e);
-    }
+
 }

@@ -18,13 +18,28 @@ public class QueueOffsetInvalidException extends InvalidOffsetException {
 
     private TopicPartition tp;
 
-    public QueueOffsetInvalidException(String message, TopicPartition tp) {
+    /**
+     * will seek to offset
+     */
+    private long offset;
+
+
+    public QueueOffsetInvalidException(String message, TopicPartition tp, long offset) {
         super(message);
         this.tp = tp;
+        this.offset = offset;
+    }
+
+    public long getOffset() {
+        return offset;
+    }
+
+    public TopicPartition getTp() {
+        return tp;
     }
 
     @Override
     public Set<TopicPartition> partitions() {
-        return Collections.singleton(tp);
+        return Collections.singleton(this.tp);
     }
 }
