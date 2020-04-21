@@ -47,7 +47,7 @@ public class BootApplication {
 
             for (int i = 0; i < 100; i++) {
                 producer.send(new ProducerRecord<>(
-                        "mark-queue-test", UUID.randomUUID().toString(), JSON.toJSONString(
+                        "mark-queue-test-1", UUID.randomUUID().toString(), JSON.toJSONString(
                         new User("userName" + i, "password" + i)
                 )
                 ));
